@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  konsolidator-api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - APP_ENV=development
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=3000
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=konsolidator
+      - DATABASE_PASSWORD=konsolidator
+      - DATABASE_NAME=konsolidator
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+    volumes:
+      - ./config:/app/config
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - konsolidator-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=konsolidator
+      - POSTGRES_PASSWORD=konsolidator
+      - POSTGRES_DB=konsolidator
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - konsolidator-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - konsolidator-network
+
+  # Optional: Adminer for database management
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - konsolidator-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  konsolidator-network:
+    driver: bridge

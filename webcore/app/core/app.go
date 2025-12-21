@@ -1,0 +1,156 @@
+package core
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"sync/atomic"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/semanggilab/webcore-go/app/config"
+	"github.com/semanggilab/webcore-go/app/logger"
+	"github.com/semanggilab/webcore-go/app/middleware"
+)
+
+var singleApp atomic.Pointer[App]
+
+type App struct {
+	Context        *AppContext
+	ModuleManager  *ModuleManager
+	LibraryManager *LibraryManager
+}
+
+func (a *App) Load() *App {
+	return singleApp.Load()
+}
+
+func Instance() *App {
+	return singleApp.Load()
+}
+
+// NewApp creates a new application instance
+func NewApp(ctx context.Context, cfg *config.Config, loaders map[string]LibraryLoader, packages []Module) *App {
+	if singleApp.Load() != nil {
+		return singleApp.Load()
+	}
+
+	// Prepare logger
+	logger.PrepareLogger(ctx, cfg.App.Logging.Level)
+
+	// Initialize LibraryLoader Manager
+	manLibrary := CreateLibraryManager(loaders)
+
+	// Initialize Module Manager
+	manModule := CreateModuleManager(&cfg.App.Module, packages)
+
+	app := &App{
+		Context: &AppContext{
+			Context:  ctx,
+			Config:   cfg,
+			Web:      nil,
+			Root:     nil,
+			EventBus: NewEventBus(),
+			// Database:  make(map[string]db.Database),
+			// Redis:     nil,
+			// PubSub:    make(map[string]*pubsub.PubSub),
+		},
+		ModuleManager:  manModule,
+		LibraryManager: manLibrary,
+	}
+
+	// update context reference
+	app.ModuleManager.context = app.Context
+
+	singleApp.Store(app)
+	return app
+}
+
+// Start starts the application
+func (a *App) Start() error {
+	// Create Fiber app
+	a.Context.Web = fiber.New(a.Context.Config.GetFiberConfig())
+
+	// Initialize shared dependencies
+	if err := a.Context.Start(); err != nil {
+		return fmt.Errorf("failed to initialize shared dependencies: %v", err)
+	}
+
+	// Setup global middleware
+	a.setupGlobalMiddleware()
+
+	// Option 1: Initialize modules without dependencies awareness
+	// if err := a.ModuleManager.InitializeModules(); err != nil {
+	// 	return err
+	// }
+	// Option 2: Initialize modules better
+	if err := a.ModuleManager.InitializeModulesWithDependencies(); err != nil {
+		return err
+	}
+
+	// Setup routes
+	a.setupRoutes()
+
+	// Start server
+	addr := fmt.Sprintf("%s:%d", a.Context.Config.Server.Host, a.Context.Config.Server.Port)
+	log.Printf("Server starting on %s", addr)
+
+	return a.Context.Web.Listen(addr)
+}
+
+// Stop stops the application gracefully
+func (a *App) Stop() error {
+	// Unload all libraries
+	a.LibraryManager.Destroy()
+
+	// Unload all modules
+	a.ModuleManager.Destroy()
+
+	return a.Context.Destroy()
+}
+
+// setupGlobalMiddleware sets up global middleware
+func (a *App) setupGlobalMiddleware() {
+	middleware.SetupGlobalMiddleware(a.Context.Web, a.Context.Config)
+
+	// Authentication middleware
+	a.Context.Root = middleware.SetupAuthMiddleware(a.Context.Web, a.Context.Config)
+}
+
+// setupRoutes sets up application routes
+func (a *App) setupRoutes() {
+	// Health check endpoint
+	a.Context.Web.Get("/health", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"status":  "ok",
+			"service": "konsolidator-pkg-satusehat",
+			// "version": "1.0.0",
+		})
+	})
+
+	// API version endpoint
+	a.Context.Web.Get("/info", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"version":     "1.0.0",
+			"modules":     a.ModuleManager.ListModules(),
+			"environment": a.Context.Config.App.Environment, // This should be added to config
+			"prefix":      a.Context.Config.Server.PathPrefix,
+		})
+	})
+
+	// Module routes will be automatically added by the registry
+}
+
+// GetModuleManager returns the central registry instance
+func (a *App) GetModuleManager() *ModuleManager {
+	return a.ModuleManager
+}
+
+// GetLibraryManager returns the library manager instance
+func (a *App) GetLibraryManager() *LibraryManager {
+	return a.LibraryManager
+}
+
+// GetSharedContext returns the shared dependencies
+func (a *App) GetSharedContext() *AppContext {
+	return a.Context
+}

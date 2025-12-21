@@ -1,0 +1,100 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.21'
+
+    - name: Build application
+      run: go build -v -o bin/konsolidator ./main.go
+
+    - name: Deploy to staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Add your deployment commands here
+        # Example: kubectl apply -f k8s/staging/ -n staging
+
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.21'
+
+    - name: Build application
+      run: go build -v -o bin/konsolidator ./main.go
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/konsolidator:latest
+          ${{ secrets.DOCKER_USERNAME }}/konsolidator:${{ github.sha }}
+        labels: |
+          org.opencontainers.image.title=Konsolidator
+          org.opencontainers.image.description=Pluggable RESTful API framework
+          org.opencontainers.image.version=${{ github.ref_name }}
+
+    - name: Update Helm chart
+      run: |
+        # Update the image tag in the Helm chart
+        sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/konsolidator:${{ github.sha }}|g" charts/konsolidator/values.yaml
+
+    - name: Package Helm chart
+      run: |
+        helm package charts/konsolidator
+
+    - name: Upload artifacts for release
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-artifacts
+        path: |
+          bin/konsolidator
+          charts/konsolidator-*.tgz
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
+        body: |
+          Changes in this Release
+          - Automated release from GitHub Actions
+        draft: false
+        prerelease: false
+        files: |
+          bin/konsolidator
+          charts/konsolidator-*.tgz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production environment..."
+        # Add your deployment commands here
+        # Example: helm upgrade --install konsolidator charts/konsolidator --namespace production --create-namespace

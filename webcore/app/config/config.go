@@ -1,0 +1,125 @@
+package config
+
+import (
+	"time"
+
+	"github.com/gofiber/fiber/v2"
+)
+
+type Config struct {
+	App      AppConfig      `mapstructure:"app"`
+	Server   ServerConfig   `mapstructure:"server"`
+	Database DatabaseConfig `mapstructure:"database"`
+	Redis    RedisConfig    `mapstructure:"redis"`
+	PubSub   PubSubConfig   `mapstructure:"pubsub"`
+	Auth     AuthConfig     `mapstructure:"auth"`
+}
+
+type AppConfig struct {
+	Name            string          `mapstructure:"name"`
+	Version         string          `mapstructure:"version"`
+	Environment     string          `mapstructure:"environment"`
+	Features        FeaturesConfig  `mapstructure:"features"`
+	Logging         LoggingConfig   `mapstructure:"logging"`
+	CORS            CORSConfig      `mapstructure:"cors"`
+	RateLimit       RateLimitConfig `mapstructure:"rate_limit"`
+	SecurityHeaders bool            `mapstructure:"security_headers"`
+	Module          ModuleConfig    `mapstructure:"module"`
+}
+
+type RateLimitConfig struct {
+	Enabled bool `mapstructure:"enabled"`
+	Max     int  `mapstructure:"max"`
+}
+
+type FeaturesConfig struct {
+	Recovery  bool `mapstructure:"recovery"`
+	Metrics   bool `mapstructure:"metrics"`
+	Tracing   bool `mapstructure:"tracing"`
+	Profiling bool `mapstructure:"profiling"`
+}
+
+type LoggingConfig struct {
+	Level  string `mapstructure:"level"`
+	Format string `mapstructure:"format"`
+	Output string `mapstructure:"output"`
+}
+
+type CORSConfig struct {
+	AllowOrigins     []string      `mapstructure:"allow_origins"`
+	AllowMethods     []string      `mapstructure:"allow_methods"`
+	AllowHeaders     []string      `mapstructure:"allow_headers"`
+	ExposeHeaders    []string      `mapstructure:"expose_headers"`
+	AllowCredentials bool          `mapstructure:"allow_credentials"`
+	MaxAge           time.Duration `mapstructure:"max_age"`
+}
+
+type ServerConfig struct {
+	Host         string        `mapstructure:"host"`
+	Port         int           `mapstructure:"port"`
+	PathPrefix   string        `mapstructure:"path"`
+	ReadTimeout  time.Duration `mapstructure:"read_timeout"`
+	WriteTimeout time.Duration `mapstructure:"write_timeout"`
+}
+
+type DatabaseConfig struct {
+	Driver          string            `mapstructure:"driver"` // supported: "postgres", "mysql", "sqlite"
+	Host            string            `mapstructure:"host"`
+	Port            int               `mapstructure:"port"`
+	User            string            `mapstructure:"user"`
+	Password        string            `mapstructure:"password"`
+	Name            string            `mapstructure:"name"`
+	SSLMode         string            `mapstructure:"ssl_mode"`
+	Attributes      map[string]string `mapstructure:"attributes"` // Additional connection parameters
+	MaxIdleConns    int               `mapstructure:"max_idle_conns"`
+	MaxOpenConns    int               `mapstructure:"max_open_conns"`
+	ConnMaxLifetime time.Duration     `mapstructure:"conn_max_lifetime"`
+	SlaveHosts      []DatabaseConfig  `mapstructure:"slave_hosts"`
+}
+
+type RedisConfig struct {
+	Host       string        `mapstructure:"host"`
+	Port       int           `mapstructure:"port"`
+	Password   string        `mapstructure:"password"`
+	DB         int           `mapstructure:"db"`
+	SlaveHosts []RedisConfig `mapstructure:"slave_hosts"`
+}
+
+type KafkaConfig struct {
+	Brokers         []string `mapstructure:"brokers"`
+	GroupID         string   `mapstructure:"group_id"`
+	Topic           string   `mapstructure:"topic"`
+	AutoOffsetReset string   `mapstructure:"offset_reset"`
+}
+
+type PubSubConfig struct {
+	ProjectID             string        `mapstructure:"project_id"`
+	Subscription          string        `mapstructure:"subscription"`
+	Topic                 string        `mapstructure:"topic"`
+	EmulatorHost          string        `mapstructure:"emulator_host"`
+	Credentials           string        `mapstructure:"credentials"`
+	MaxMessagesPerPull    int           `mapstructure:"max_messages_per_pull"`
+	SleepTimeBetweenPulls time.Duration `mapstructure:"sleep_time_between_pulls"`
+}
+
+type AuthConfig struct {
+	Type         string        `mapstructure:"type"` // e.g., "jwt", "api_key"
+	SecretKey    string        `mapstructure:"secret_key"`
+	ExpiresIn    time.Duration `mapstructure:"expires_in"`     // In seconds
+	APIKeyHeader string        `mapstructure:"api_key_header"` // Header name for API key (default: "X-API-Key")
+	APIKeyPrefix string        `mapstructure:"api_key_prefix"` // Optional prefix for API key validation
+}
+
+type ModuleConfig struct {
+	Disabled []string `mapstructure:"disabled"`
+	BasePath string   `mapstructure:"base_path"`
+}
+
+func (c *Config) GetFiberConfig() fiber.Config {
+	return fiber.Config{
+		ReadTimeout:   c.Server.ReadTimeout,
+		WriteTimeout:  c.Server.WriteTimeout,
+		CaseSensitive: true,
+		StrictRouting: true,
+	}
+}
