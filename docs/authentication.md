@@ -17,11 +17,11 @@ The authentication settings are configured in the `api` section of your `config.
 
 ```yaml
 api:
-  type: "jwt"  # Options: "jwt", "api_key"
+  type: "jwt"  # Options: "jwt", "apikey"
   secret_key: your-secret-key-here
   expires_in: 86400  # 24 hours in seconds
   
-  # API Key specific settings (only used when type is "api_key")
+  # API Key specific settings (only used when type is "apikey")
   api_key_header: "X-API-Key"  # Header name for API key
   api_key_prefix: ""  # Optional prefix for API key validation
 ```
@@ -105,7 +105,7 @@ You can customize the API key validation:
 
 ```yaml
 api:
-  type: "api_key"
+  type: "apikey"
   api_key_header: "X-API-Key"  # Custom header name
   api_key_prefix: "service-"    # Optional prefix for validation
 ```
@@ -114,8 +114,8 @@ With the prefix configuration, an API key like `service-abc123` would be validat
 
 #### Context Data Available After API Key Authentication
 
-- `api_key`: The API key value
-- `auth_type`: Set to "api_key"
+- `apikey`: The API key value
+- `auth_type`: Set to "apikey"
 
 ## Middleware Usage
 
@@ -225,7 +225,7 @@ func AdminOnlyHandler(c *fiber.Ctx) error {
 ```go
 func ServiceHandler(c *fiber.Ctx) error {
     authType := middleware.GetAuthType(c)
-    if authType != "api_key" {
+    if authType != "apikey" {
         return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
             "error": "API key authentication required",
         })
@@ -274,7 +274,7 @@ api:
 
 # API Key Authentication  
 api:
-  type: "api_key"
+  type: "apikey"
   api_key_header: "X-API-Key"
 ```
 
@@ -288,7 +288,7 @@ The middleware will automatically handle the authentication method based on the 
 # Generate a JWT token (using a tool like jwt.io)
 # Then make a request:
 curl -H "Authorization: Bearer <your-jwt-token>" \
-     http://localhost:3000/api/v1/module-a/users
+     http://localhost:7272/api/v1/module-a/users
 ```
 
 ### API Key Authentication Test
@@ -296,11 +296,11 @@ curl -H "Authorization: Bearer <your-jwt-token>" \
 ```bash
 # Using Authorization header
 curl -H "Authorization: Bearer <your-api-key>" \
-     http://localhost:3000/api/v1/module-a/users
+     http://localhost:7272/api/v1/module-a/users
 
 # Using custom header
 curl -H "X-API-Key: <your-api-key>" \
-     http://localhost:3000/api/v1/module-a/users
+     http://localhost:7272/api/v1/module-a/users
 ```
 
 ## Troubleshooting

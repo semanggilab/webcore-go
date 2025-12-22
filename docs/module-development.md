@@ -104,7 +104,7 @@ import (
     "github.com/gofiber/fiber/v2"
     "github.com/semanggilab/webcore-go/app/registry"
     "github.com/semanggilab/webcore-go/app/shared"
-    "github.com/semanggilab/webcore-go/packages/mymodule/service"
+    "github.com/semanggilab/webcore-go/modules/mymodule/service"
 )
 
 type Handler struct {
@@ -157,7 +157,7 @@ import (
     
     "github.com/semanggilab/webcore-go/app/registry"
     "github.com/semanggilab/webcore-go/app/shared"
-    "github.com/semanggilab/webcore-go/packages/mymodule/repository"
+    "github.com/semanggilab/webcore-go/modules/mymodule/repository"
 )
 
 // ItemService defines the interface for item operations
@@ -488,8 +488,8 @@ Your module can use shared dependencies:
 
 ```go
 type Module struct {
-    db     *shared.Database
-    redis  *shared.Redis
+    db     *loader.IDatabase
+    redis  *loader.IRedis
     logger *shared.Logger
     eventBus *shared.EventBus
 }

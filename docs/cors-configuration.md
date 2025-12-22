@@ -14,7 +14,7 @@ CORS is configured through the `app.cors` section in your configuration file. Th
 app:
   cors:
     allow_origins:
-      - "http://localhost:3000"
+      - "http://localhost:7272"
       - "http://localhost:8080"
       - "https://yourdomain.com"
     allow_methods:
@@ -132,7 +132,7 @@ export APP_CORS_MAX_AGE=3600
 app:
   cors:
     allow_origins:
-      - "http://localhost:3000"
+      - "http://localhost:7272"
       - "http://localhost:8080"
       - "http://localhost:5173"  # Vite dev server
     allow_methods:

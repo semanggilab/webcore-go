@@ -54,7 +54,7 @@ Edit `.env` with your configuration:
 # Application
 APP_ENV=development
 APP_DEBUG=true
-APP_PORT=3000
+APP_PORT=7272
 
 # Database
 DB_HOST=localhost
@@ -121,7 +121,7 @@ go run cmd/migrate/main.go
 go run main.go
 ```
 
-The API will be available at `http://localhost:3000`
+The API will be available at `http://localhost:7272`
 
 ## Docker Deployment
 
@@ -146,7 +146,7 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - "7272:7272"
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
@@ -241,7 +241,7 @@ COPY --from=builder /app/config ./config
 # Copy SSL certificates if needed
 COPY --from=builder /app/ssl ./ssl
 
-EXPOSE 3000
+EXPOSE 7272
 
 CMD ["./main"]
 ```
@@ -274,7 +274,7 @@ data:
     app:
       environment: production
       debug: false
-      port: 3000
+      port: 7272
     
     database:
       host: postgres-service
@@ -354,7 +354,7 @@ spec:
       - name: api
         image: konsolidator-api:v1.0.0
         ports:
-        - containerPort: 3000
+        - containerPort: 7272
         env:
         - name: APP_ENV
           value: "production"
@@ -377,13 +377,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 3000
+            port: 7272
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /health
-            port: 3000
+            port: 7272
           initialDelaySeconds: 5
           periodSeconds: 5
         volumeMounts:
@@ -410,7 +410,7 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 3000
+    targetPort: 7272
   type: ClusterIP
 ```
 
@@ -498,7 +498,7 @@ docker push <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/konsolidator-api:la
       "image": "<aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/konsolidator-api:latest",
       "portMappings": [
         {
-          "containerPort": 3000,
+          "containerPort": 7272,
           "protocol": "tcp"
         }
       ],
@@ -612,7 +612,7 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
     
     location / {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:7272;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -676,13 +676,14 @@ redis:
 ### 3. Monitoring and Logging
 
 #### Structured Logging
-
-```go
-// Configure structured logging
-logger := shared.NewLogger()
-logger.SetLevel("info")
-logger.SetFormat("json")
-logger.SetOutput("stdout")
+Loggig configure through config.yaml in app.logging properties
+```yaml
+app:
+  # logging settings
+  logging:
+    level: info
+    format: "${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error}\n"
+    output: stdout
 ```
 
 #### Health Checks
@@ -692,7 +693,7 @@ logger.SetOutput("stdout")
 livenessProbe:
   httpGet:
     path: /health
-    port: 3000
+    port: 7272
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
@@ -701,7 +702,7 @@ livenessProbe:
 readinessProbe:
   httpGet:
     path: /health
-    port: 3000
+    port: 7272
   initialDelaySeconds: 5
   periodSeconds: 5
   timeoutSeconds: 3
@@ -807,14 +808,8 @@ Create a Grafana dashboard with:
 ### 2. Logging
 
 #### Structured Logging
-
+Configure structured logging in config.yaml by setting app.logging.format to 'json'
 ```go
-// Configure structured logging
-logger := shared.NewLogger()
-logger.SetLevel("info")
-logger.SetFormat("json")
-logger.SetOutput("stdout")
-
 // Log structured data
 logger.Info("API request",
     "method", "GET",

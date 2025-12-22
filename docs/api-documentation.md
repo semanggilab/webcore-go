@@ -485,7 +485,7 @@ When an event occurs, the webhook receives:
 ### Connect to WebSocket
 
 ```
-ws://localhost:3000/ws
+ws://localhost:7272/ws
 ```
 
 Connect to the WebSocket endpoint for real-time updates.
@@ -521,7 +521,7 @@ The API uses URL versioning:
 API documentation is available at:
 
 ```
-http://localhost:3000/docs
+http://localhost:7272/docs
 ```
 
 This provides interactive API documentation with:

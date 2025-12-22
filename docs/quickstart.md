@@ -38,7 +38,7 @@ Edit the `.env` file with your configuration:
 # Application settings
 APP_ENV=development
 APP_DEBUG=true
-APP_PORT=3000
+APP_PORT=7272
 
 # Database settings
 DB_HOST=localhost
@@ -82,7 +82,7 @@ go run cmd/migrate/main.go
 go run main.go
 ```
 
-The API will be available at `http://localhost:3000`
+The API will be available at `http://localhost:7272`
 
 ## Quick Start without Docker
 
@@ -121,7 +121,7 @@ go run main.go
 ### 1. Health Check
 
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:7272/health
 ```
 
 Response:
@@ -136,7 +136,7 @@ Response:
 ### 2. Get Module Info
 
 ```bash
-curl http://localhost:3000/info
+curl http://localhost:7272/info
 ```
 
 Response:
@@ -159,7 +159,7 @@ Response:
 #### Create an Item
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/module-a/items \
+curl -X POST http://localhost:7272/api/v1/module-a/items \
   -H "Content-Type: application/json" \
   -d '{"name": "Test Item", "status": "active"}'
 ```
@@ -178,7 +178,7 @@ Response:
 #### Get Items
 
 ```bash
-curl http://localhost:3000/api/v1/module-a/items
+curl http://localhost:7272/api/v1/module-a/items
 ```
 
 Response:
@@ -231,7 +231,7 @@ Implement JWT authentication by adding the auth module and following the authent
 1. **Port Already in Use**
    ```bash
    # Check what's using the port
-   lsof -i :3000
+   lsof -i :7272
    
    # Kill the process
    kill -9 <PID>
@@ -261,23 +261,23 @@ Here's a simple example of how to use the API:
 #!/bin/bash
 
 # Get all items
-curl -s http://localhost:3000/api/v1/module-a/items | jq .
+curl -s http://localhost:7272/api/v1/module-a/items | jq .
 
 # Create a new item
-curl -s -X POST http://localhost:3000/api/v1/module-a/items \
+curl -s -X POST http://localhost:7272/api/v1/module-a/items \
   -H "Content-Type: application/json" \
   -d '{"name": "New Item", "status": "active"}' | jq .
 
 # Get a specific item
-curl -s http://localhost:3000/api/v1/module-a/items/1 | jq .
+curl -s http://localhost:7272/api/v1/module-a/items/1 | jq .
 
 # Update an item
-curl -s -X PUT http://localhost:3000/api/v1/module-a/items/1 \
+curl -s -X PUT http://localhost:7272/api/v1/module-a/items/1 \
   -H "Content-Type: application/json" \
   -d '{"name": "Updated Item", "status": "inactive"}' | jq .
 
 # Delete an item
-curl -s -X DELETE http://localhost:3000/api/v1/module-a/items/1 | jq .
+curl -s -X DELETE http://localhost:7272/api/v1/module-a/items/1 | jq .
 ```
 
 ## Contributing
