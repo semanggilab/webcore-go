@@ -19,11 +19,7 @@ type LibraryManager struct {
 }
 
 func CreateLibraryManager(loaders map[string]LibraryLoader) *LibraryManager {
-	// Avoid redundant LibraryLoader
-	// newLoaders := CheckSingleLoader("LibraryLoader", loaders)
-
 	return &LibraryManager{
-		// Loaders: newLoaders,
 		Loaders:   loaders,
 		Libraries: make(map[string]map[string]loader.Library),
 	}

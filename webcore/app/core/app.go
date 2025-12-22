@@ -51,9 +51,6 @@ func NewApp(ctx context.Context, cfg *config.Config, loaders map[string]LibraryL
 			Web:      nil,
 			Root:     nil,
 			EventBus: NewEventBus(),
-			// Database:  make(map[string]db.Database),
-			// Redis:     nil,
-			// PubSub:    make(map[string]*pubsub.PubSub),
 		},
 		ModuleManager:  manModule,
 		LibraryManager: manLibrary,
@@ -79,11 +76,7 @@ func (a *App) Start() error {
 	// Setup global middleware
 	a.setupGlobalMiddleware()
 
-	// Option 1: Initialize modules without dependencies awareness
-	// if err := a.ModuleManager.InitializeModules(); err != nil {
-	// 	return err
-	// }
-	// Option 2: Initialize modules better
+	// Initialize modules better
 	if err := a.ModuleManager.InitializeModulesWithDependencies(); err != nil {
 		return err
 	}
@@ -114,7 +107,6 @@ func (a *App) setupGlobalMiddleware() {
 	middleware.SetupGlobalMiddleware(a.Context.Web, a.Context.Config)
 
 	// Authentication middleware
-	// a.Context.Root = middleware.SetupAuthMiddleware(a.Context.Web, a.Context.Config)
 	a.setupAuthMiddleware()
 }
 
