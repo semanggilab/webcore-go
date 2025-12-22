@@ -2,13 +2,13 @@ package kafka
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/semanggilab/webcore-go/app/config"
+	"github.com/semanggilab/webcore-go/app/helper"
 	"github.com/semanggilab/webcore-go/app/logger"
 )
 
@@ -289,7 +289,7 @@ func (kp *KafkaProducer) SendMessage(ctx context.Context, key string, value []by
 
 // SendJSONMessage mengirim pesan sebagai JSON ke Kafka topic
 func (kp *KafkaProducer) SendJSONMessage(ctx context.Context, key string, data interface{}) error {
-	jsonData, err := json.Marshal(data)
+	jsonData, err := helper.JSONMarshal(data)
 	if err != nil {
 		return fmt.Errorf("gagal marshal JSON: %v", err)
 	}

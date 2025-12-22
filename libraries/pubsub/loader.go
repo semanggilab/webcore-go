@@ -8,7 +8,10 @@ import (
 )
 
 type PubSubLoader struct {
-	PubSub *PubSub
+}
+
+func (l *PubSubLoader) ClassName() string {
+	return "PubSub"
 }
 
 func (l *PubSubLoader) Init(args ...any) (loader.Library, error) {
@@ -26,7 +29,5 @@ func (l *PubSubLoader) Init(args ...any) (loader.Library, error) {
 	}
 
 	pubsub.Connect()
-
-	l.PubSub = pubsub
 	return pubsub, nil
 }

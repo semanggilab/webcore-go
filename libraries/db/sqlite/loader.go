@@ -8,7 +8,11 @@ import (
 )
 
 type SqliteLoader struct {
-	DB *sql.SQLDatabase
+	// DB *sql.SQLDatabase
+}
+
+func (a *SqliteLoader) ClassName() string {
+	return "SQLDatabase"
 }
 
 func (l *SqliteLoader) Init(args ...any) (loader.Library, error) {
@@ -24,6 +28,6 @@ func (l *SqliteLoader) Init(args ...any) (loader.Library, error) {
 
 	db.Connect()
 
-	l.DB = db
+	// l.DB = db
 	return db, nil
 }

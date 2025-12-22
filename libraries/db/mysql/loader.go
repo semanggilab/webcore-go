@@ -8,7 +8,11 @@ import (
 )
 
 type MysqlLoader struct {
-	DB *sql.SQLDatabase
+	// DB *sql.SQLDatabase
+}
+
+func (a *MysqlLoader) ClassName() string {
+	return "SQLDatabase"
 }
 
 func (l *MysqlLoader) Init(args ...any) (loader.Library, error) {
@@ -24,6 +28,6 @@ func (l *MysqlLoader) Init(args ...any) (loader.Library, error) {
 
 	db.Connect()
 
-	l.DB = db
+	// l.DB = db
 	return db, nil
 }

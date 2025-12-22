@@ -37,14 +37,14 @@ func NewPubSub(ctx context.Context, config config.PubSubConfig) (*PubSub, error)
 	// Configure PubSub client options
 	opts := []option.ClientOption{}
 
-	if config.EmulatorHost != "" {
-		opts = append(opts, option.WithEndpoint(config.EmulatorHost), option.WithoutAuthentication())
-	}
+	// if config.EmulatorHost != "" {
+	// 	opts = append(opts, option.WithEndpoint(config.EmulatorHost), option.WithoutAuthentication())
+	// }
 
-	if config.Credentials != "" {
+	if config.CredentialsPath != "" {
 		// In a real implementation, you would load credentials from the provided string
 		// For now, we'll use the default credentials
-		opts = append(opts, option.WithCredentialsFile(config.Credentials))
+		opts = append(opts, option.WithCredentialsFile(config.CredentialsPath))
 	}
 
 	client, err = pubsub.NewClient(ctx, config.ProjectID, opts...)
@@ -87,6 +87,11 @@ func (ps *PubSub) RegisterReceiver(receiver loader.PubSubReceiver) {
 }
 
 func (ps *PubSub) StartReceiving(ctx context.Context) {
+	if len(ps.Receivers) == 0 {
+		logger.Error("PubSub has no Receiver to process incomming message")
+		return
+	}
+
 	// Ensure topic and subscription exist
 	if !ps.EnsureTopicExists(ctx) {
 		logger.Error("Topic tidak ditemukan")
@@ -95,10 +100,6 @@ func (ps *PubSub) StartReceiving(ctx context.Context) {
 
 	if !ps.EnsureSubscriptionExists(ctx) {
 		logger.Error("Subscription tidak ditemukan")
-		return
-	}
-
-	if len(ps.Receivers) == 0 {
 		return
 	}
 
@@ -118,17 +119,17 @@ func (ps *PubSub) StartReceiving(ctx context.Context) {
 				return
 			default:
 				// Pull messages from PubSub
-				messages, err := ps.PullMessages(ctx, ps.Config.MaxMessagesPerPull)
+				messages, err := ps.PullMessages(ctx, ps.Config.Consumer.MaxMessagesPerPull)
 				if err != nil {
 					logger.Error("Error pulling messages", "error", err)
 					// Wait before retrying
-					time.Sleep(ps.Config.SleepTimeBetweenPulls)
+					time.Sleep(ps.Config.Consumer.SleepTimeBetweenPulls)
 					continue
 				}
 
 				if len(messages) == 0 {
 					// No messages received, wait before pulling again
-					time.Sleep(ps.Config.SleepTimeBetweenPulls)
+					time.Sleep(ps.Config.Consumer.SleepTimeBetweenPulls)
 					continue
 				}
 
