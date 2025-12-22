@@ -31,7 +31,7 @@ func LoadDefaultConfigModule[T Configurable](moduleName string, c T) error {
 
 func LoadConfigModule[T Configurable](moduleName string, c T, file string, ext string, path []string) error {
 	prefix := getKeyPrefix(moduleName, true)
-	return LoadConfig(prefix, c, "config", "yaml", []string{})
+	return LoadConfig(prefix, c, file, ext, path)
 }
 
 func LoadConfig[T Configurable](prefix string, c T, file string, ext string, path []string) error {
@@ -157,8 +157,10 @@ func setPriorityDefaults(c Configurable, holder *ConfigHolder, replacer *strings
 				}
 			}
 		}
+	}
 
-		// tandai sudah diproses
+	// tandai yang sudah di-binding sebagai sudah diproses
+	for runtimeKey := range bindings {
 		holder.KeyProcessed[runtimeKey] = true
 	}
 

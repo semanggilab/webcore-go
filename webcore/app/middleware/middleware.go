@@ -100,10 +100,10 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 	}
 
 	// Send custom error page
-	return c.Status(code).JSON(helper.APIError{
+	return c.Status(code).JSON(helper.WebResponse(&helper.Response{
 		HttpCode:  code,
 		ErrorCode: 1,
 		ErrorName: "UNKNOWN",
 		Message:   err.Error(),
-	})
+	}))
 }

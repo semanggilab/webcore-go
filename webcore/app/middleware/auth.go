@@ -53,12 +53,12 @@ func RoleRequired(allowedRoles ...string) fiber.Handler {
 		// For JWT authentication, check the role claims
 		userRole := GetUserRole(c)
 		if userRole == nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(helper.APIError{
+			return c.Status(fiber.StatusUnauthorized).JSON(helper.WebResponse(&helper.Response{
 				HttpCode:  fiber.StatusUnauthorized,
 				ErrorCode: 2,
 				ErrorName: "UNAUTHORIZED",
 				Message:   "User role not found in context",
-			})
+			}))
 		}
 
 		role := userRole.(string)
@@ -68,12 +68,12 @@ func RoleRequired(allowedRoles ...string) fiber.Handler {
 			}
 		}
 
-		return c.Status(fiber.StatusForbidden).JSON(helper.APIError{
+		return c.Status(fiber.StatusForbidden).JSON(helper.WebResponse(&helper.Response{
 			HttpCode:  fiber.StatusUnauthorized,
 			ErrorCode: 2,
 			ErrorName: "UNAUTHORIZED",
 			Message:   "Insufficient permissions",
-		})
+		}))
 	}
 }
 
@@ -92,12 +92,12 @@ func PermissionRequired(requiredPermission string) fiber.Handler {
 		// For JWT authentication, check the permission claims
 		userPermissions := GetUserPermissions(c)
 		if userPermissions == nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(helper.APIError{
+			return c.Status(fiber.StatusUnauthorized).JSON(helper.WebResponse(&helper.Response{
 				HttpCode:  fiber.StatusUnauthorized,
 				ErrorCode: 2,
 				ErrorName: "UNAUTHORIZED",
 				Message:   "User permissions not found in context",
-			})
+			}))
 		}
 
 		permissions := userPermissions.([]any)
@@ -107,11 +107,11 @@ func PermissionRequired(requiredPermission string) fiber.Handler {
 			}
 		}
 
-		return c.Status(fiber.StatusForbidden).JSON(helper.APIError{
+		return c.Status(fiber.StatusForbidden).JSON(helper.WebResponse(&helper.Response{
 			HttpCode:  fiber.StatusUnauthorized,
 			ErrorCode: 2,
 			ErrorName: "UNAUTHORIZED",
 			Message:   "Insufficient permissions",
-		})
+		}))
 	}
 }

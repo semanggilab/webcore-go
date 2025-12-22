@@ -2,16 +2,19 @@ package helper
 
 import (
 	"reflect"
-	"time"
 )
+
+var Environment = "development"
 
 // Response represents a standard API response
 type Response struct {
-	Success   bool      `json:"success"`
-	Message   string    `json:"message,omitempty"`
-	Data      any       `json:"data,omitempty"`
-	Error     string    `json:"error,omitempty"`
-	Timestamp time.Time `json:"timestamp"`
+	HttpCode   int      `json:"httpCode,omitempty"`
+	ErrorCode  int      `json:"errorCode,omitempty"`
+	ErrorName  string   `json:"errorName,omitempty"`
+	Message    string   `json:"message,omitempty"`
+	Data       any      `json:"data,omitempty"`
+	StackTrace []string `json:"stack,omitempty"`
+	Details    string   `json:"details,omitempty"`
 }
 
 // Pagination represents pagination parameters
@@ -35,49 +38,33 @@ type Sort struct {
 	Direction string `json:"direction" form:"direction"` // "asc" or "desc"
 }
 
-// APIError represents an API error response
-type APIError struct {
-	HttpCode   int    `json:"httpCode"`
-	ErrorCode  int    `json:"errorCode"`
-	ErrorName  string `json:"errorName"`
-	Message    string `json:"message"`
-	StackTrace string `json:"stack,omitempty"`
-	Details    string `json:"details,omitempty"`
-}
-
-// Error implements the error interface
-func (e *APIError) Error() string {
-	return e.Message
-}
-
 // NewSuccessResponse creates a success response
 func NewSuccessResponse(data any) Response {
 	return Response{
-		Success:   true,
-		Data:      data,
-		Timestamp: time.Now(),
+		Data: data,
 	}
 }
 
-// NewErrorResponse creates an error response
-func NewErrorResponse(message string) Response {
-	return Response{
-		Success:   false,
-		Message:   message,
-		Error:     message,
-		Timestamp: time.Now(),
+// Error implements the error interface
+func (e *Response) Error() string {
+	return e.Message
+}
+
+func WebResponse(response *Response) *Response {
+	if response.ErrorCode > 0 && response.ErrorName != "" && Environment == "development" {
+		// response.StackTrace = strings.Split(string(debug.Stack()), "\n")
 	}
+
+	return response
 }
 
 // NewPaginatedResponse creates a paginated response
 func NewPaginatedResponse(data any, pagination Pagination) Response {
 	return Response{
-		Success: true,
 		Data: map[string]any{
 			"items":      data,
 			"pagination": pagination,
 		},
-		Timestamp: time.Now(),
 	}
 }
 

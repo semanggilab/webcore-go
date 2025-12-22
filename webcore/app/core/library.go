@@ -9,6 +9,7 @@ import (
 )
 
 type LibraryLoader interface {
+	SetClassName(name string)
 	ClassName() string
 	Init(args ...any) (loader.Library, error)
 }
@@ -19,6 +20,11 @@ type LibraryManager struct {
 }
 
 func CreateLibraryManager(loaders map[string]LibraryLoader) *LibraryManager {
+	// setClassName with key
+	for k, v := range loaders {
+		v.SetClassName(k)
+	}
+
 	return &LibraryManager{
 		Loaders:   loaders,
 		Libraries: make(map[string]map[string]loader.Library),

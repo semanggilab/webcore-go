@@ -117,10 +117,11 @@ func (a *App) setupAuthMiddleware() {
 			return c.Next()
 		}
 	} else {
-		lName := "authn:" + a.Context.Config.Auth.Type
-		loader, ok := a.LibraryManager.GetLoader(lName)
-		if !ok {
-			logger.Fatal("LibraryLoader tidak ditemukan", "name", lName)
+		// lName := "authentication:" + a.Context.Config.Auth.Type
+		// loader, ok := a.LibraryManager.GetLoader(lName)
+		loader, e := a.Context.GetDefaultLibraryLoader("authentication")
+		if e != nil {
+			logger.Fatal(e.Error())
 		}
 
 		// Initialize module components

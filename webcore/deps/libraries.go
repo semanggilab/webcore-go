@@ -9,12 +9,12 @@ import (
 )
 
 var APP_LIBRARIES = map[string]core.LibraryLoader{
-	// "db:postgres":     &postgres.PostgresLoader{},
-	"db:mongodb": &mongo.MongoLoader{},
+	// "database:postgres":     &postgres.PostgresLoader{},
+	"database:mongodb": &mongo.MongoLoader{},
 	// "redis":           &redis.RedisLoader{},
-	"pubsub":          &pubsub.PubSubLoader{},
-	"auth.store:yaml": &yaml.YamlLoader{},
-	"authn:apikey":    &apikey.ApiKeyLoader{},
+	"pubsub":                &pubsub.PubSubLoader{},
+	"authstorage:yaml":      &yaml.YamlLoader{},
+	"authentication:apikey": &apikey.ApiKeyLoader{},
 
 	// Add your library here
 }

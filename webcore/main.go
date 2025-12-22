@@ -6,6 +6,7 @@ import (
 
 	"github.com/semanggilab/webcore-go/app/config"
 	"github.com/semanggilab/webcore-go/app/core"
+	"github.com/semanggilab/webcore-go/app/helper"
 	"github.com/semanggilab/webcore-go/deps"
 )
 
@@ -18,6 +19,8 @@ func main() {
 	if err := config.LoadDefaultConfig(&cfg); err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
+
+	helper.Environment = cfg.App.Environment
 
 	// Initialize application
 	application := core.NewApp(ctx, &cfg, deps.APP_LIBRARIES, deps.APP_PACKAGES)

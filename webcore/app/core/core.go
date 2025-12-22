@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/semanggilab/webcore-go/app/config"
+	"github.com/semanggilab/webcore-go/app/loader"
 	"github.com/semanggilab/webcore-go/app/logger"
 )
 
@@ -25,11 +26,11 @@ func (a *AppContext) Start() error {
 
 	// Initialize database if configured
 	if a.Config.Database.Host != "" {
-		// a.SetupDatabase("default", a.Config.Database)
-		lName := "db:" + a.Config.Database.Driver
-		loader, ok := libmanager.GetLoader(lName)
-		if !ok {
-			return fmt.Errorf("LibraryLoader '%s' tidak ditemukan", lName)
+		// lName := "database:" + a.Config.Database.Driver
+		// loader, ok := libmanager.GetLoader(lName)
+		loader, e := a.GetDefaultLibraryLoader("database")
+		if e != nil {
+			return e
 		}
 
 		_, err := libmanager.LoadSingletonFromLoader(loader, a.Context, a.Config.Database)
@@ -75,6 +76,35 @@ func (a *AppContext) Destroy() error {
 	}
 
 	return nil
+}
+
+func (a *AppContext) GetDefaultLibraryLoader(name string) (LibraryLoader, error) {
+	name = a.getDefaultName(name)
+	loader, ok := Instance().LibraryManager.GetLoader(name)
+	if !ok {
+		return nil, fmt.Errorf("LibraryLoader '%s' tidak ditemukan", name)
+	}
+
+	return loader, nil
+}
+
+func (a *AppContext) GetDefaultSingleton(name string) (loader.Library, bool) {
+	instance := Instance()
+	name = a.getDefaultName(name)
+
+	return instance.LibraryManager.GetSingleton(name)
+}
+
+func (a *AppContext) getDefaultName(name string) string {
+	switch name {
+	case "database":
+		name = name + ":" + a.Config.Database.Driver
+	case "authstorage":
+		name = name + ":" + a.Config.Auth.Store
+	case "authentication":
+		name = name + ":" + a.Config.Auth.Type
+	}
+	return name
 }
 
 func CheckSingleLoader[L any](name string, loaders []L) []L {
