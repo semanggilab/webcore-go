@@ -93,7 +93,7 @@ func (m *Module) Init(ctx *core.AppContext) error {
     }
 
     // Load singleton library via core.LibraryManager.GetSingleton
-    if lib, ok := core.Instance().Context.GetDefaultSingleton("database"); ok {
+    if lib, ok := core.Instance().Context.GetDefaultSingletonInstance(("database"); ok {
         db := lib.(loader.IDatabase)
         // Initialize your module components
         m.repository = repository.NewRepository(db)
@@ -652,7 +652,7 @@ func (m *Module) Info(c *fiber.Ctx) error {
 func (m *Module) Init(ctx *core.AppContext) error {
     // Load singleton library via core.LibraryManager.GetSingleton
     // The parameter is taken from the key in APP_LIBRARIES variable in webcore/deps/libraries.go
-    if lib, ok := core.Instance().Context.GetDefaultSingleton("database"); ok {
+    if lib, ok := core.Instance().Context.GetDefaultSingletonInstance(("database"); ok {
         // shared library successfully loaded
         db := lib.(loader.IDatabase)
 

@@ -100,7 +100,7 @@ type YourLibraryLoader struct {
     YourLibrary *YourLibrary
 }
 
-func (l *YourLibraryLoader) ClassName() string {
+func (l *YourLibraryLoader) Name() string {
     return "YourLibrary"
 }
 
@@ -221,7 +221,7 @@ func (m *Module) Init(ctx *core.AppContext) error {
         // ... other initialization
 
         // Get your library instance using key 'yourlibrary' that register in webcore/deps/libraries.go
-        if lib, ok := core.Instance().Context.GetDefaultSingleton("yourlibrary"); ok {
+        if lib, ok := core.Instance().Context.GetDefaultSingletonInstance(("yourlibrary"); ok {
             yourLib := lib.(loader.YourLibraryInterface) // Cast to your interface
             
             // Use your library
@@ -298,7 +298,7 @@ type RedisLoader struct {
     Redis *Redis
 }
 
-func (l *RedisLoader) ClassName() string {
+func (l *RedisLoader) Name() string {
     return "Redis"
 }
 

@@ -107,7 +107,7 @@ return fmt.Errorf("module '%s' is disabled in configuration", moduleName)
 When modules are skipped during auto-loading:
 
 ```go
-slog.Info("Info: skipping disabled module '%s' from %s\n", moduleName, basePath)
+logger.Info("Info: skipping disabled module '%s' from %s\n", moduleName, basePath)
 ```
 
 ## Best Practices
